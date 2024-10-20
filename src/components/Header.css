@@ -1,8 +1,10 @@
+@import "../index.css";
+
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #36b37e;
+    background-color: var(--primary-color);
     padding: 20px;
 }
 
@@ -20,7 +22,7 @@
     border-radius: 5px;
     cursor: pointer;
     background-color: white;
-    color: #36b37e;
+    color: var(--primary-color);
     font-weight: bold;
     transition: background-color 0.3s;
 }

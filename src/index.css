@@ -5,6 +5,15 @@ body,
     padding: 0;
     height: 100%;
     width: 100%;
-    background-color: #d0d0d0;
+    background-color: #dadada;
     color: #333;
+}
+
+
+:root {
+    --primary-color: #9d80c8;
+    --primary-color-dark: #9572c8;
+    --secondary-color: #9eb17b;
+    --secondary-color-dark: #94a571;
+    --disabled-color: #bbb;
 }

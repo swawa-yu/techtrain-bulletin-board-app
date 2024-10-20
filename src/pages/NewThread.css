@@ -1,3 +1,5 @@
+@import "../index.css";
+
 .new-thread-container {
     display: flex;
     flex-direction: column;
@@ -31,19 +33,21 @@
 }
 
 .back-button {
-    background-color: #2196f3;
+    background-color: var(--secondary-color);
     color: white;
+    transition: background-color 0.3s;
 }
 
 .back-button:hover {
-    background-color: #1e88e5;
+    background-color: var(--secondary-color-dark);
 }
 
 .create-button {
-    background-color: #4caf50;
+    background-color: var(--primary-color);
     color: white;
+    transition: background-color 0.3s;
 }
 
 .create-button:hover {
-    background-color: #45a049;
+    background-color: var(--primary-color-dark);
 }
