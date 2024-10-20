@@ -1,8 +1,10 @@
 import React from "react";
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./LatestThreads.css";
 
 function LatestThreads() {
+    const navigate = useNavigate();
     const [threads, setThreads] = useState([]);
 
     const fetchThreads = async () => {
@@ -23,12 +25,18 @@ function LatestThreads() {
         fetchThreads();
     }, []);
 
+    const handleNavigate = (id, title) => {
+        navigate(`/threads/${id}`, { state: { threadTitle: title } });
+    }
+
     return (
         <div>
             <h2 className="title">新着スレッド</h2>
             <div className="thread-list">
                 {threads.map((thread) => (
-                    <button key={thread.id} className="thread-button">
+                    <button key={thread.id} className="thread-button" onClick={() => {
+                        handleNavigate(thread.id, thread.title);
+                    }}>
                         {thread.title}
                     </button>
                 ))}
