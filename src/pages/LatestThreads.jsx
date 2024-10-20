@@ -1,16 +1,19 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./LatestThreads.css";
 
 function LatestThreads() {
     const navigate = useNavigate();
     const [threads, setThreads] = useState([]);
-    const [threadMap, setThreadMap] = useState({}); // linked listのように前後のthreadIdを持つ
+    const [threadMap, setThreadMap] = useState({});
     const [latestThreadId, setLatestThreadId] = useState(null);
-
+    const [offset, setOffset] = useState(0);
+    const [isFetching, setIsFetching] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
 
     const fetchThreads = async (offset = 0) => {
+        setIsFetching(true);
         const API_URL = `https://railway.bulletinboard.techtrain.dev/threads?offset=${offset}`;
         try {
             const response = await fetch(API_URL);
@@ -18,10 +21,13 @@ function LatestThreads() {
                 throw new Error("APIの呼び出しに失敗しました");
             }
             const data = await response.json();
-            setThreads(data);
-            setLatestThreadId(data[0].id);
-            // 現在のthreadMapにthreadIdがなければ追加、あれば値を更新する形でthreadMapを更新
-            // 値を更新する時には、prevThreadやnextThreadがあればそのまま、なければ追加
+            if (data.length === 0) {
+                setHasMore(false);
+                return;
+            }
+            if (offset === 0 && data.length > 0) {
+                setLatestThreadId(data[0].id);
+            }
             setThreadMap((prevThreadMap) => {
                 const newThreadMap = { ...prevThreadMap };
                 data.forEach((thread, index) => {
@@ -44,27 +50,53 @@ function LatestThreads() {
             });
         } catch (error) {
             console.error("Error fetching threads:", error);
+        } finally {
+            setIsFetching(false);
         }
     };
 
     useEffect(() => {
-        for (let i = 0; i < 20; i++) {
-            fetchThreads(i * 8);
-            // ちょっと待つ
-            new Promise((resolve) => setTimeout(resolve, 300));
-        }
+        setOffset(0);
+        fetchThreads(0);
+        setOffset(8);
+        fetchThreads(8);
+        setOffset(16);
+        fetchThreads(16);
+        setOffset(24);
+        fetchThreads(24);
     }, []);
 
     useEffect(() => {
-        // threadMapを元に、最新のスレッドから遡っていき、最新のスレッドまでのリストを作成し、stateにセット
+        const handleScroll = () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                if (hasMore && !isFetching) {
+                    fetchMoreThreads();
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [hasMore, isFetching]);
+
+    const fetchMoreThreads = () => {
+        console.log("fetchMoreThreads");
+        if (hasMore && !isFetching) {
+            const newOffset = offset + 8;
+            console.log("newOffset", newOffset);
+            setOffset(newOffset);
+            fetchThreads(newOffset);
+        }
+    };
+
+    useEffect(() => {
         const threadList = [];
         let currentThreadId = latestThreadId;
         while (currentThreadId) {
-            threadList.unshift(threadMap[currentThreadId]);
-            currentThreadId = threadMap[currentThreadId].prevThread;
+            threadList.push(threadMap[currentThreadId]);
+            currentThreadId = threadMap[currentThreadId].nextThread;
         }
         setThreads(threadList);
-        console.log(threadList);
     }, [threadMap]);
 
     const handleNavigate = (id, title) => {
@@ -82,6 +114,7 @@ function LatestThreads() {
                         {thread.title}
                     </button>
                 ))}
+                {isFetching && <p>読み込み中...</p>}
             </div>
         </div>
     );
