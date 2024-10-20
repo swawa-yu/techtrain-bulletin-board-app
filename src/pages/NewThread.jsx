@@ -22,8 +22,7 @@ function NewThread() {
             }
 
             const data = await response.json();
-            console.log("Thread created:", data);
-            // navigate(`/thread/{data.threadId}`); // 作成したスレッドに遷移
+            navigate(`/threads/${data.id}`, { state: { threadTitle: data.title } }); // 作成したスレッドに遷移
         } catch (error) {
             console.error("Error creating thread:", error);
             alert("スレッドの作成に失敗しました。もう一度試してください。");
