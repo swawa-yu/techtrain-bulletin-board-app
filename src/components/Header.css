@@ -1,8 +1,30 @@
-header {
-    margin: 0px;
-    height: 60px;
-    background-color: #333;
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #36b37e;
+    padding: 20px;
+}
+
+.header-title {
+    margin: 0;
     color: white;
-    padding: 15px;
-    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.create-thread {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: white;
+    color: #36b37e;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.create-thread:hover {
+    background-color: #e0e0e0;
 }

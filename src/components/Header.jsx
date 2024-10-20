@@ -1,10 +1,20 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./Header.css";
 
-export default function Header() {
+function Header() {
+    const navigate = useNavigate();
+
     return (
-        <header>
-            掲示板
-            <button>スレッドを立てる</button>
+        <header className="header">
+            <h1 className="header-title" onClick={() => { navigate("/"); }}>
+                掲示板アプリ
+            </h1>
+            <button className="create-thread" onClick={() => { navigate("/threads/new"); }}>
+                スレッドをたてる
+            </button>
         </header>
-    )
+    );
 }
+
+export default Header;

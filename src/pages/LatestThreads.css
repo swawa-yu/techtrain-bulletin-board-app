@@ -1,0 +1,25 @@
+.thread-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+}
+
+.thread-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.thread-button {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: left;
+}
+
+.thread-button:hover {
+    background-color: #e0e0e0;
+}
