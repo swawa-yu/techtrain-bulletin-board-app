@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LatestThreads.css";
 
@@ -11,6 +11,8 @@ function LatestThreads() {
     const [offset, setOffset] = useState(0);
     const [isFetching, setIsFetching] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+
+    const observerRef = useRef();
 
     const fetchThreads = async (offset = 0) => {
         setIsFetching(true);
@@ -58,32 +60,36 @@ function LatestThreads() {
     useEffect(() => {
         setOffset(0);
         fetchThreads(0);
-        setOffset(8);
-        fetchThreads(8);
-        setOffset(16);
-        fetchThreads(16);
-        setOffset(24);
-        fetchThreads(24);
     }, []);
 
     useEffect(() => {
-        const handleScroll = () => {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-                if (hasMore && !isFetching) {
+        let observer;
+        if (observerRef.current) {
+            const options = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1,
+            };
+
+            observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasMore && !isFetching) {
                     fetchMoreThreads();
                 }
+            }, options);
+
+            observer.observe(observerRef.current);
+        }
+
+        return () => {
+            if (observer && observerRef.current) {
+                observer.unobserve(observerRef.current);
             }
         };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [hasMore, isFetching]);
+    }, [observerRef.current, hasMore, isFetching]);
 
     const fetchMoreThreads = () => {
-        console.log("fetchMoreThreads");
         if (hasMore && !isFetching) {
             const newOffset = offset + 8;
-            console.log("newOffset", newOffset);
             setOffset(newOffset);
             fetchThreads(newOffset);
         }
@@ -107,13 +113,30 @@ function LatestThreads() {
         <div>
             <h2 className="title">新着スレッド</h2>
             <div className="thread-list">
-                {threads.map((thread) => (
-                    <button key={thread.id} className="thread-button" onClick={() => {
-                        handleNavigate(thread.id, thread.title);
-                    }}>
-                        {thread.title}
-                    </button>
-                ))}
+                {threads.map((thread, index) => {
+                    if (index === threads.length - 1) {
+                        return (
+                            <button
+                                key={thread.id}
+                                ref={observerRef}
+                                className="thread-button"
+                                onClick={() => handleNavigate(thread.id, thread.title)}
+                            >
+                                {thread.title}
+                            </button>
+                        );
+                    } else {
+                        return (
+                            <button
+                                key={thread.id}
+                                className="thread-button"
+                                onClick={() => handleNavigate(thread.id, thread.title)}
+                            >
+                                {thread.title}
+                            </button>
+                        );
+                    }
+                })}
                 {isFetching && <p>読み込み中...</p>}
             </div>
         </div>
