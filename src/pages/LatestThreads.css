@@ -1,6 +1,8 @@
-.thread-title {
+.title {
     font-size: 26px;
     margin-bottom: 20px;
+    padding: 0 10px;
+    text-align: left;
 }
 
 .thread-list {
@@ -18,7 +20,6 @@
     cursor: pointer;
     transition: background-color 0.3s;
     text-align: left;
-    /* background-color: #f0f0f0; */
     background-color: #fafafa;
 }
 

@@ -32,7 +32,7 @@ function ThreadDetail() {
 
     return (
         <div className="thread-detail-container">
-            <h2>{threadTitle}</h2>
+            <h2 className="thread-title">{threadTitle}</h2>
             <div className="posts-container">
                 {posts.map((post) => (
                     <div key={post.id} className="post-card">
