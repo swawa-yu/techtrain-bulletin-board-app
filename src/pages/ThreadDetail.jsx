@@ -8,11 +8,15 @@ function ThreadDetail() {
     const { threadId } = useParams();
     const [posts, setPosts] = useState([]);
     const [newPost, setNewPost] = useState("");
-    const [isPosting, setIsPosting] = useState(false); // 投稿処理中かどうかを管理。POSTリクエストが完了するまでtrueにする
+    const [isPosting, setIsPosting] = useState(false);
+    const [offset, setOffset] = useState(0);
+    const [isFetching, setIsFetching] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
 
     const threadTitle = location.state ? location.state.threadTitle : "(スレッドタイトルを取得できませんでした)";
 
     const fetchPosts = async (offset = 0) => {
+        setIsFetching(true);
         const API_URL = `https://railway.bulletinboard.techtrain.dev/threads/${threadId}/posts?offset=${offset}`;
         try {
             const response = await fetch(API_URL);
@@ -20,15 +24,21 @@ function ThreadDetail() {
                 throw new Error("APIの呼び出しに失敗しました");
             }
             const data = await response.json();
-            setPosts((prevPosts) => [...data.posts, ...prevPosts]);
+            if (data.posts.length === 0) {
+                setHasMore(false);
+                return;
+            }
+            setPosts((prevPosts) => [...prevPosts, ...data.posts]);
         } catch (error) {
             console.error("Error fetching posts:", error);
+        } finally {
+            setIsFetching(false);
         }
     }
 
     const handlePostSubmit = async (e) => {
         e.preventDefault();
-        if (!newPost === "")
+        if (newPost === "")
             return;
 
         const API_URL = `https://railway.bulletinboard.techtrain.dev/threads/${threadId}/posts`;
@@ -47,8 +57,11 @@ function ThreadDetail() {
                 throw new Error("投稿の送信に失敗しました");
             }
 
+            // 新しい投稿が追加されたので、投稿リストをリフレッシュ
             setPosts([]);
-            fetchPosts();
+            setOffset(0);
+            setHasMore(true);
+            fetchPosts(0);
             setNewPost("");
         } catch (error) {
             console.error("Error posting:", error);
@@ -60,8 +73,31 @@ function ThreadDetail() {
 
     useEffect(() => {
         setPosts([]);
-        fetchPosts();
-    }, []);
+        setOffset(0);
+        setHasMore(true);
+        fetchPosts(0);
+    }, [threadId]);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                if (hasMore && !isFetching) {
+                    fetchMorePosts();
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [hasMore, isFetching]);
+
+    const fetchMorePosts = () => {
+        if (hasMore && !isFetching) {
+            const newOffset = offset + 10; // 10件ずつ取得
+            setOffset(newOffset);
+            fetchPosts(newOffset);
+        }
+    };
 
     return (
         <div className="thread-detail-container">
@@ -84,6 +120,7 @@ function ThreadDetail() {
                         <div className="post-content">{post.post}</div>
                     </div>
                 ))}
+                {isFetching && <p>読み込み中...</p>}
             </div>
         </div>
     );
