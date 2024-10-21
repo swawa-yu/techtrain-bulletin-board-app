@@ -67,7 +67,7 @@ function ThreadDetail() {
         setPostMap({});
         setHasMore(true);
         fetchPosts(0);
-    }, [threadId]);
+    }, []);
 
     const lastPostElementRef = useCallback(node => {
         if (isFetching) return;
